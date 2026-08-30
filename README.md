@@ -70,7 +70,7 @@ Make sure Docker and Docker Compose are installed and running:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/ShelfSync.git
+git clone https://github.com/Harsh-Choudhary-Git/ShelfSync.git
 cd ShelfSync
 
 # 2. Copy environment file (optional, defaults are baked in)
