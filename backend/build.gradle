@@ -9,9 +9,8 @@ version = '0.0.1-SNAPSHOT'
 description = 'Full-Stack Library Management System'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(22)
-	}
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
