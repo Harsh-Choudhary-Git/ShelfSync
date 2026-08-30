@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/shelfsync}
+    username: ${SPRING_DATASOURCE_USERNAME:shelfsync_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:shelfsync_secure_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

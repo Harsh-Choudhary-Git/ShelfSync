@@ -1,0 +1,43 @@
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: shelf-sync
+  datasource:
+    url: ${DATABASE_URL:jdbc:h2:file:./data/shelfsync;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
+    username: ${DATABASE_USERNAME:sa}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: ${DATABASE_DRIVER:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours
+  library:
+    default-borrow-days: ${DEFAULT_BORROW_DAYS:14}
+    fine-per-day: ${FINE_PER_DAY:1.50}
+    max-active-loans: ${MAX_ACTIVE_LOANS:5}
+
+logging:
+  level:
+    root: INFO
+    com.shelf.sync: INFO
+    org.springframework.security: INFO

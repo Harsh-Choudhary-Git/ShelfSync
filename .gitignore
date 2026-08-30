@@ -1,0 +1,53 @@
+# -------------------------------------------------------------
+# ShelfSync - Root .gitignore
+# -------------------------------------------------------------
+
+# Operating System & IDE Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# Environment Variables & Local Secrets
+.env
+*.local
+*.log
+
+# Local Embedded Database Files
+data/
+*.mv.db
+*.trace.db
+
+# Backend - Gradle & Java Build Artifacts
+backend/.gradle/
+backend/build/
+backend/out/
+backend/bin/
+backend/.settings/
+backend/.classpath
+backend/.project
+backend/*.jar
+backend/*.war
+
+# Backend - Maven
+backend/target/
+backend/pom.xml.tag
+backend/pom.xml.releaseBackup
+backend/pom.xml.versionsBackup
+
+# Frontend - Node & Vite Artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.tmp/
+frontend/*.local
+frontend/.eslintcache
+
+# Docker Volumes
+pgdata/
