@@ -31,9 +31,9 @@ export const Navbar: React.FC<{ onMenuToggle: () => void }> = ({ onMenuToggle })
         </span>
       </div>
 
-      {/* Right controls: Demo Role Switcher & Profile Logout */}
+      {/* Right controls: Role Profile Switcher & Profile Logout */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* Quick Demo Switcher Pill */}
+        {/* Role Profile Switcher Pill */}
         <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 text-xs">
           <button
             type="button"
@@ -44,7 +44,7 @@ export const Navbar: React.FC<{ onMenuToggle: () => void }> = ({ onMenuToggle })
                 ? 'bg-brand-600 text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
-            title="Switch to Admin Demo Account"
+            title="Switch to Administrator Profile"
           >
             <Shield className="w-3 h-3" />
             <span className="hidden md:inline">Admin</span>
@@ -58,7 +58,7 @@ export const Navbar: React.FC<{ onMenuToggle: () => void }> = ({ onMenuToggle })
                 ? 'bg-brand-600 text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
-            title="Switch to Librarian Demo Account"
+            title="Switch to Librarian Profile"
           >
             <BookOpen className="w-3 h-3" />
             <span className="hidden md:inline">Librarian</span>
@@ -72,7 +72,7 @@ export const Navbar: React.FC<{ onMenuToggle: () => void }> = ({ onMenuToggle })
                 ? 'bg-brand-600 text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
-            title="Switch to Member Demo Account"
+            title="Switch to Member Profile"
           >
             <UserIcon className="w-3 h-3" />
             <span className="hidden md:inline">Member</span>

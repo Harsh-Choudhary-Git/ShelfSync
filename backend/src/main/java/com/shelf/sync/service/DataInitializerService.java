@@ -56,28 +56,22 @@ public class DataInitializerService implements CommandLineRunner {
     public void run(String... args) {
         settingService.initializeDefaultSettings();
 
-        if (userRepository.count() > 0) {
-            logger.info("Database already seeded. Skipping initial data load.");
+        // 1. Ensure core users exist and have updated passwords and active status
+        User admin = seedOrUpdateUser("admin", "admin@shelfsync.io", "Admin@123", "Alexander", "Pierce", "+1 555-0100", Role.ROLE_ADMIN);
+        User lib1 = seedOrUpdateUser("librarian1", "sarah.connor@shelfsync.io", "Lib@123", "Sarah", "Connor", "+1 555-0101", Role.ROLE_LIBRARIAN);
+        User lib2 = seedOrUpdateUser("librarian2", "david.kim@shelfsync.io", "Lib@123", "David", "Kim", "+1 555-0102", Role.ROLE_LIBRARIAN);
+        User mem1 = seedOrUpdateUser("member1", "alice.johnson@example.com", "Mem@123", "Alice", "Johnson", "+1 555-0201", Role.ROLE_MEMBER);
+        User mem2 = seedOrUpdateUser("member2", "brian.miller@example.com", "Mem@123", "Brian", "Miller", "+1 555-0202", Role.ROLE_MEMBER);
+        User mem3 = seedOrUpdateUser("member3", "clara.oswald@example.com", "Mem@123", "Clara", "Oswald", "+1 555-0203", Role.ROLE_MEMBER);
+        User mem4 = seedOrUpdateUser("member4", "daniel.craig@example.com", "Mem@123", "Daniel", "Craig", "+1 555-0204", Role.ROLE_MEMBER);
+        User mem5 = seedOrUpdateUser("member5", "elena.rostova@example.com", "Mem@123", "Elena", "Rostova", "+1 555-0205", Role.ROLE_MEMBER);
+
+        if (categoryRepository.count() > 0) {
+            logger.info("Library catalog already seeded. Skipping catalog initialization.");
             return;
         }
 
-        logger.info("Seeding initial demo data for ShelfSync LMS...");
-
-        // 1. Create Users
-        User admin = new User("admin", "admin@shelfsync.io", passwordEncoder.encode("Admin@123"), "Alexander", "Pierce", "+1 555-0100", Role.ROLE_ADMIN);
-        userRepository.save(admin);
-
-        User lib1 = new User("librarian1", "sarah.connor@shelfsync.io", passwordEncoder.encode("Lib@123"), "Sarah", "Connor", "+1 555-0101", Role.ROLE_LIBRARIAN);
-        User lib2 = new User("librarian2", "david.kim@shelfsync.io", passwordEncoder.encode("Lib@123"), "David", "Kim", "+1 555-0102", Role.ROLE_LIBRARIAN);
-        userRepository.save(lib1);
-        userRepository.save(lib2);
-
-        User mem1 = new User("member1", "alice.johnson@example.com", passwordEncoder.encode("Mem@123"), "Alice", "Johnson", "+1 555-0201", Role.ROLE_MEMBER);
-        User mem2 = new User("member2", "brian.miller@example.com", passwordEncoder.encode("Mem@123"), "Brian", "Miller", "+1 555-0202", Role.ROLE_MEMBER);
-        User mem3 = new User("member3", "clara.oswald@example.com", passwordEncoder.encode("Mem@123"), "Clara", "Oswald", "+1 555-0203", Role.ROLE_MEMBER);
-        User mem4 = new User("member4", "daniel.craig@example.com", passwordEncoder.encode("Mem@123"), "Daniel", "Craig", "+1 555-0204", Role.ROLE_MEMBER);
-        User mem5 = new User("member5", "elena.rostova@example.com", passwordEncoder.encode("Mem@123"), "Elena", "Rostova", "+1 555-0205", Role.ROLE_MEMBER);
-        userRepository.saveAll(List.of(mem1, mem2, mem3, mem4, mem5));
+        logger.info("Seeding initial catalog data for ShelfSync...");
 
         // 2. Create Categories
         Category catCS = categoryRepository.save(new Category("Computer Science", "Software engineering, algorithms, architectures, and programming languages"));
@@ -256,5 +250,21 @@ public class DataInitializerService implements CommandLineRunner {
         reservationRepository.save(res3);
 
         logger.info("Demo data seeding completed successfully!");
+    }
+
+    private User seedOrUpdateUser(String username, String email, String plainPassword, String firstName, String lastName, String phone, Role role) {
+        User user = userRepository.findByUsername(username)
+                .or(() -> userRepository.findByEmail(email))
+                .orElseGet(User::new);
+
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(plainPassword));
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setPhone(phone);
+        user.setRole(role);
+        user.setStatus(UserStatus.ACTIVE);
+        return userRepository.save(user);
     }
 }

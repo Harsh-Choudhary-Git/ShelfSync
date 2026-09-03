@@ -18,8 +18,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + usernameOrEmail));
+        if (usernameOrEmail == null || usernameOrEmail.isBlank()) {
+            throw new UsernameNotFoundException("Username or email cannot be empty");
+        }
+        String query = usernameOrEmail.trim();
+        User user = userRepository.findByUsername(query)
+                .or(() -> userRepository.findByEmail(query))
+                .or(() -> userRepository.findByUsernameOrEmail(query, query))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + query));
 
         return UserDetailsImpl.build(user);
     }
