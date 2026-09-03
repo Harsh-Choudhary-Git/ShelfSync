@@ -1,8 +1,6 @@
 package com.shelf.sync.controller;
 
 import com.shelf.sync.dto.ApiResponse;
-import com.shelf.sync.dto.AuthRequest;
-import com.shelf.sync.dto.AuthResponse;
 import com.shelf.sync.dto.RegisterRequest;
 import com.shelf.sync.dto.UserResponse;
 import com.shelf.sync.service.AuthService;
@@ -10,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,14 +18,8 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody AuthRequest loginRequest) {
-        AuthResponse authResponse = authService.authenticateUser(loginRequest);
-        return ResponseEntity.ok(ApiResponse.ok("Login successful", authResponse));
-    }
-
     @PostMapping("/register")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         UserResponse userResponse = authService.registerMember(registerRequest);
         return ResponseEntity.status(HttpStatus.CREATED)

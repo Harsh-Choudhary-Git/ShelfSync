@@ -48,9 +48,6 @@ public class DataInitializerService implements CommandLineRunner {
     @Autowired
     private SettingService settingService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Override
     @Transactional
     public void run(String... args) {
@@ -259,7 +256,7 @@ public class DataInitializerService implements CommandLineRunner {
 
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(plainPassword));
+        user.setPassword("FIREBASE_AUTH");
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setPhone(phone);

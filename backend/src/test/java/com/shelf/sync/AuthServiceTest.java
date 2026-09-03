@@ -1,7 +1,5 @@
 package com.shelf.sync;
 
-import com.shelf.sync.dto.AuthRequest;
-import com.shelf.sync.dto.AuthResponse;
 import com.shelf.sync.dto.RegisterRequest;
 import com.shelf.sync.dto.UserResponse;
 import com.shelf.sync.entity.Role;
@@ -9,7 +7,6 @@ import com.shelf.sync.entity.User;
 import com.shelf.sync.entity.UserStatus;
 import com.shelf.sync.exception.ConflictException;
 import com.shelf.sync.repository.UserRepository;
-import com.shelf.sync.security.JwtUtils;
 import com.shelf.sync.security.UserDetailsImpl;
 import com.shelf.sync.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,16 +28,7 @@ import static org.mockito.Mockito.*;
 public class AuthServiceTest {
 
     @Mock
-    private AuthenticationManager authenticationManager;
-
-    @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private JwtUtils jwtUtils;
 
     @InjectMocks
     private AuthService authService;
@@ -52,7 +37,7 @@ public class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        sampleUser = new User("testuser", "test@example.com", "encodedPassword", "Test", "User", "+1234567890", Role.ROLE_MEMBER);
+        sampleUser = new User("testuser", "test@example.com", "FIREBASE_AUTH", "Test", "User", "+1234567890", Role.ROLE_MEMBER);
         sampleUser.setId(1L);
         sampleUser.setStatus(UserStatus.ACTIVE);
     }
@@ -63,7 +48,6 @@ public class AuthServiceTest {
 
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("hashedPassword");
         when(userRepository.save(any(User.class))).thenReturn(sampleUser);
 
         UserResponse response = authService.registerMember(request);
@@ -95,20 +79,17 @@ public class AuthServiceTest {
     }
 
     @Test
-    void testAuthenticateUser_Success() {
-        AuthRequest request = new AuthRequest("testuser", "password123");
+    void testGetCurrentUser_Success() {
         UserDetailsImpl userDetails = UserDetailsImpl.build(sampleUser);
-        Authentication auth = mock(Authentication.class);
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        when(auth.getPrincipal()).thenReturn(userDetails);
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
-        when(jwtUtils.generateJwtToken(auth)).thenReturn("mock.jwt.token");
         when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
 
-        AuthResponse response = authService.authenticateUser(request);
+        UserResponse response = authService.getCurrentUser();
 
         assertNotNull(response);
-        assertEquals("mock.jwt.token", response.getToken());
-        assertEquals("testuser", response.getUser().getUsername());
+        assertEquals("testuser", response.getUsername());
     }
 }

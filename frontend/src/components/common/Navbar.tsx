@@ -4,13 +4,21 @@ import { useAuth } from '../../context/AuthContext';
 import { Badge } from './Badge';
 
 export const Navbar: React.FC<{ onMenuToggle: () => void }> = ({ onMenuToggle }) => {
-  const { user, logout, quickLogin } = useAuth();
+  const { user, logout, signInWithEmail } = useAuth();
   const [isSwitching, setIsSwitching] = useState(false);
 
   const handleRoleSwitch = async (role: 'ADMIN' | 'LIBRARIAN' | 'MEMBER') => {
     setIsSwitching(true);
     try {
-      await quickLogin(role);
+      if (role === 'ADMIN') {
+        await signInWithEmail('admin@shelfsync.io', 'Admin@123');
+      } else if (role === 'LIBRARIAN') {
+        await signInWithEmail('librarian1@shelfsync.io', 'Lib@123');
+      } else {
+        await signInWithEmail('member1@shelfsync.io', 'Mem@123');
+      }
+    } catch (e) {
+      console.warn('Role switch note:', e);
     } finally {
       setIsSwitching(false);
     }

@@ -15,19 +15,19 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class AuthEntryPointJwt implements AuthenticationEntryPoint {
+public class FirebaseAuthEntryPoint implements AuthenticationEntryPoint {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthEntryPointJwt.class);
+    private static final Logger logger = LoggerFactory.getLogger(FirebaseAuthEntryPoint.class);
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException, ServletException {
-        logger.error("Unauthorized error: {}", authException.getMessage());
+        logger.error("Unauthorized Firebase access attempt: {}", authException.getMessage());
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        ApiResponse<Object> apiResponse = ApiResponse.error("Full authentication is required to access this resource: " + authException.getMessage());
+        ApiResponse<Object> apiResponse = ApiResponse.error("Firebase authentication is required to access this resource: " + authException.getMessage());
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();

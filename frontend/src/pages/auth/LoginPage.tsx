@@ -19,16 +19,17 @@ import {
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login, quickLogin, isAuthenticated, user } = useAuth();
+  const { signInWithEmail, signInWithGoogle, isAuthenticated, user } = useAuth();
   const { error, success } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [activeTab, setActiveTab] = useState<'signin' | 'admin-create'>('signin');
-  const [usernameOrEmail, setUsernameOrEmail] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const from = location.state?.from?.pathname || (
     user?.role === 'ROLE_ADMIN' ? '/admin/dashboard' :
@@ -36,51 +37,91 @@ export const LoginPage: React.FC = () => {
     '/member/dashboard'
   );
 
+  const mapFirebaseError = (err: any): string => {
+    const code = err.code || '';
+    if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+      return 'Invalid email or password. Please verify your credentials.';
+    }
+    if (code === 'auth/invalid-email') {
+      return 'Please provide a valid email address.';
+    }
+    if (code === 'auth/user-disabled') {
+      return 'This user account has been deactivated.';
+    }
+    if (code === 'auth/too-many-requests') {
+      return 'Too many unsuccessful attempts. Access is temporarily locked. Please try again later.';
+    }
+    if (code === 'auth/popup-closed-by-user') {
+      return 'Google sign-in popup was closed before completing.';
+    }
+    if (code === 'auth/unauthorized-domain') {
+      return 'This domain is not authorized in your Firebase Console. Please add localhost to Authorized Domains.';
+    }
+    if (code === 'auth/operation-not-allowed') {
+      return 'This sign-in provider is not enabled in your Firebase Authentication Console.';
+    }
+    return err.message || 'Authentication failed. Please verify credentials.';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!usernameOrEmail || !password) {
-      error('Validation Error', 'Please enter your username/email and password.');
+    if (!email || !password) {
+      error('Validation Error', 'Please enter both your email address and password.');
       return;
     }
 
+    // Convert simple usernames to standard email format if needed (e.g. member1 -> member1@shelfsync.io)
+    const formattedEmail = email.includes('@') ? email.trim() : `${email.trim()}@shelfsync.io`;
+
     setIsLoading(true);
     try {
-      await login({ usernameOrEmail: usernameOrEmail.trim(), password });
-      success('Welcome Back', 'Authenticated successfully.');
-      navigate(from, { replace: true });
+      const authenticatedUser = await signInWithEmail(formattedEmail, password);
+      success('Welcome Back', `Authenticated successfully as ${authenticatedUser?.fullName || 'User'}.`);
+      
+      const targetPath = authenticatedUser?.role === 'ROLE_ADMIN' 
+        ? '/admin/dashboard' 
+        : authenticatedUser?.role === 'ROLE_LIBRARIAN' 
+        ? '/librarian/dashboard' 
+        : '/member/dashboard';
+      navigate(location.state?.from?.pathname || targetPath, { replace: true });
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Invalid username or password. Please verify credentials.';
-      error('Authentication Failed', msg);
+      error('Authentication Failed', mapFirebaseError(err));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRoleSelect = async (role: 'ADMIN' | 'LIBRARIAN' | 'MEMBER') => {
-    let un = 'member1';
-    let pw = 'Mem@123';
-    if (role === 'ADMIN') {
-      un = 'admin';
-      pw = 'Admin@123';
-    } else if (role === 'LIBRARIAN') {
-      un = 'librarian1';
-      pw = 'Lib@123';
-    }
-
-    setUsernameOrEmail(un);
-    setPassword(pw);
-
-    setIsLoading(true);
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
     try {
-      await login({ usernameOrEmail: un, password: pw });
-      success('Authentication Successful', `Signed in as ${role.toLowerCase()}.`);
-      if (role === 'ADMIN') navigate('/admin/dashboard', { replace: true });
-      else if (role === 'LIBRARIAN') navigate('/librarian/dashboard', { replace: true });
-      else navigate('/member/dashboard', { replace: true });
+      const authenticatedUser = await signInWithGoogle();
+      success('Google Sign-In Successful', `Welcome, ${authenticatedUser?.fullName || 'User'}!`);
+      
+      const targetPath = authenticatedUser?.role === 'ROLE_ADMIN' 
+        ? '/admin/dashboard' 
+        : authenticatedUser?.role === 'ROLE_LIBRARIAN' 
+        ? '/librarian/dashboard' 
+        : '/member/dashboard';
+      navigate(location.state?.from?.pathname || targetPath, { replace: true });
     } catch (err: any) {
-      error('Sign In Failed', err.response?.data?.message || 'Unable to authenticate with selected profile');
+      if (err.code !== 'auth/popup-closed-by-user') {
+        error('Google Sign-In Failed', mapFirebaseError(err));
+      }
     } finally {
-      setIsLoading(false);
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleRoleSelect = (role: 'ADMIN' | 'LIBRARIAN' | 'MEMBER') => {
+    if (role === 'ADMIN') {
+      setEmail('admin@shelfsync.io');
+      setPassword('Admin@123');
+    } else if (role === 'LIBRARIAN') {
+      setEmail('librarian1@shelfsync.io');
+      setPassword('Lib@123');
+    } else {
+      setEmail('member1@shelfsync.io');
+      setPassword('Mem@123');
     }
   };
 
@@ -135,31 +176,66 @@ export const LoginPage: React.FC = () => {
         <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800 py-8 px-6 sm:px-10 rounded-3xl shadow-2xl space-y-6">
           {activeTab === 'signin' ? (
             <>
-              {/* Sign In Header Info */}
+              {/* Sign In Header */}
               <div className="border-b border-slate-800/80 pb-4">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <KeyRound className="w-5 h-5 text-brand-400" />
-                  Sign In
+                  Firebase Authentication
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Enter your credentials to access your library workspace.
+                  Authenticate securely via Email/Password or Google Identity.
                 </p>
+              </div>
+
+              {/* Google Sign In Button */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleLoading || isLoading}
+                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-slate-950 hover:bg-slate-800 border border-slate-700/90 rounded-xl text-white text-sm font-semibold transition-all shadow-sm hover:border-slate-500 cursor-pointer disabled:opacity-50"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>{isGoogleLoading ? 'Connecting to Google...' : 'Sign in with Google'}</span>
+              </button>
+
+              <div className="relative flex items-center justify-center">
+                <div className="border-t border-slate-800 w-full" />
+                <span className="bg-slate-900 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 absolute">
+                  or with email
+                </span>
               </div>
 
               {/* Login Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Username or Email
+                    Email Address
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       required
-                      value={usernameOrEmail}
-                      onChange={(e) => setUsernameOrEmail(e.target.value)}
-                      placeholder="e.g. member1, librarian1, or admin"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="e.g. member1@shelfsync.io or admin"
                       className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                     />
                   </div>
@@ -194,10 +270,10 @@ export const LoginPage: React.FC = () => {
 
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || isGoogleLoading}
                   className="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-500 active:bg-brand-700 shadow-md shadow-brand-600/30 transition-all disabled:opacity-50 cursor-pointer"
                 >
-                  {isLoading ? 'Authenticating...' : 'Sign In'}
+                  {isLoading ? 'Verifying with Firebase...' : 'Sign In'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
@@ -210,7 +286,6 @@ export const LoginPage: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
-                    disabled={isLoading}
                     onClick={() => handleRoleSelect('ADMIN')}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-950/60 hover:bg-purple-950/40 border border-slate-800 hover:border-purple-500 text-slate-300 hover:text-white transition-all text-xs font-medium cursor-pointer"
                   >
@@ -220,7 +295,6 @@ export const LoginPage: React.FC = () => {
 
                   <button
                     type="button"
-                    disabled={isLoading}
                     onClick={() => handleRoleSelect('LIBRARIAN')}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-950/60 hover:bg-sky-950/40 border border-slate-800 hover:border-sky-500 text-slate-300 hover:text-white transition-all text-xs font-medium cursor-pointer"
                   >
@@ -230,7 +304,6 @@ export const LoginPage: React.FC = () => {
 
                   <button
                     type="button"
-                    disabled={isLoading}
                     onClick={() => handleRoleSelect('MEMBER')}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-950/60 hover:bg-emerald-950/40 border border-slate-800 hover:border-emerald-500 text-slate-300 hover:text-white transition-all text-xs font-medium cursor-pointer"
                   >
@@ -244,16 +317,16 @@ export const LoginPage: React.FC = () => {
               <div className="bg-slate-950/60 rounded-2xl p-4 border border-slate-800/80 flex items-start gap-3 text-left">
                 <Info className="w-4 h-4 text-brand-400 mt-0.5 shrink-0" />
                 <div className="text-xs text-slate-400 space-y-1">
-                  <p className="font-semibold text-slate-300">Need Access?</p>
+                  <p className="font-semibold text-slate-300">Firebase Security</p>
                   <p>
-                    Accounts are managed and issued strictly by the <strong className="text-white">System Administrator</strong>. Please contact your institution's administrator for credentials.
+                    All passwords and credentials are cryptographically protected by Google Firebase Auth with JWT ID Tokens.
                   </p>
                 </div>
               </div>
             </>
           ) : (
             <>
-              {/* Admin-Only Account Creation Info & Gateway */}
+              {/* Admin-Only Account Creation Info */}
               <div className="border-b border-slate-800/80 pb-4">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-wider mb-2">
                   <Shield className="w-3.5 h-3.5" />
@@ -271,8 +344,8 @@ export const LoginPage: React.FC = () => {
                 <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white font-semibold">Role-Based Provisioning:</strong>
-                    <p className="text-slate-400 mt-0.5">Admins can create accounts with assigned permissions (<span className="text-emerald-400">Member</span>, <span className="text-sky-400">Librarian</span>, <span className="text-purple-400">Admin</span>).</p>
+                    <strong className="text-white font-semibold">Firebase Identity:</strong>
+                    <p className="text-slate-400 mt-0.5">Admin-provisioned accounts are synchronized with Firebase Authentication and assigned local system roles (<span className="text-emerald-400">Member</span>, <span className="text-sky-400">Librarian</span>, <span className="text-purple-400">Admin</span>).</p>
                   </div>
                 </div>
 
@@ -280,7 +353,7 @@ export const LoginPage: React.FC = () => {
                   <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                   <div>
                     <strong className="text-white font-semibold">Institutional Governance:</strong>
-                    <p className="text-slate-400 mt-0.5">Public self-registration is disabled to safeguard library catalog resources and maintain compliance.</p>
+                    <p className="text-slate-400 mt-0.5">Public self-registration is managed to safeguard library catalog resources and maintain compliance.</p>
                   </div>
                 </div>
               </div>
@@ -305,12 +378,14 @@ export const LoginPage: React.FC = () => {
                   </p>
                   <button
                     type="button"
-                    onClick={() => handleRoleSelect('ADMIN')}
-                    disabled={isLoading}
+                    onClick={() => {
+                      handleRoleSelect('ADMIN');
+                      setActiveTab('signin');
+                    }}
                     className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-purple-600 hover:bg-purple-500 active:bg-purple-700 shadow-md shadow-purple-600/30 transition-all cursor-pointer"
                   >
                     <Shield className="w-4 h-4" />
-                    Sign In as Admin & Create Account
+                    Fill Admin Credentials & Sign In
                   </button>
                   <button
                     type="button"
@@ -328,5 +403,3 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
-
-

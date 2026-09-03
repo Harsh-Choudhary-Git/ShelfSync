@@ -14,7 +14,6 @@ import com.shelf.sync.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +22,6 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private AuthService authService;
@@ -55,12 +51,13 @@ public class UserService {
         User user = new User(
                 request.getUsername().trim(),
                 request.getEmail().trim(),
-                passwordEncoder.encode(request.getPassword()),
+                "FIREBASE_AUTH",
                 request.getFirstName().trim(),
                 request.getLastName().trim(),
                 request.getPhone() != null ? request.getPhone().trim() : null,
                 request.getRole()
         );
+        user.setStatus(UserStatus.ACTIVE);
 
         User saved = userRepository.save(user);
         return new UserResponse(saved);
@@ -124,11 +121,8 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new BadRequestException("Current password is incorrect");
-        }
-
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        // Password updates for Firebase users are managed via Firebase client SDK
+        user.setPassword("FIREBASE_AUTH");
         userRepository.save(user);
     }
 }

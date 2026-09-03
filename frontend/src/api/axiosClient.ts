@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { auth } from '../config/firebase';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
@@ -9,12 +10,24 @@ export const axiosClient = axios.create({
   },
 });
 
-// Request interceptor to attach JWT token
+// Request interceptor to attach Firebase ID token
 axiosClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const idToken = await currentUser.getIdToken();
+        if (config.headers) {
+          config.headers.Authorization = `Bearer ${idToken}`;
+        }
+      } else {
+        const cachedToken = localStorage.getItem('token');
+        if (cachedToken && config.headers) {
+          config.headers.Authorization = `Bearer ${cachedToken}`;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not retrieve Firebase ID token:', e);
     }
     return config;
   },
@@ -23,14 +36,14 @@ axiosClient.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors and token expiration
+// Response interceptor to handle errors and session expiration
 axiosClient.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // If unauthorized and on protected route, clear token
+      // If unauthorized and not already on auth page, redirect to login
       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');

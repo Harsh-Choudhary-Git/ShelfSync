@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
-  const { user, isAuthenticated, quickLogin } = useAuth();
+  const { user, isAuthenticated, signInWithEmail } = useAuth();
   const { error, success } = useToast();
   const navigate = useNavigate();
 
@@ -91,10 +91,10 @@ export const RegisterPage: React.FC = () => {
   const handleAdminQuickSignIn = async () => {
     setIsLoading(true);
     try {
-      await quickLogin('ADMIN');
+      await signInWithEmail('admin@shelfsync.io', 'Admin@123');
       success('Admin Authenticated', 'You now have access to account creation.');
     } catch (err: any) {
-      error('Admin Login Failed', err.response?.data?.message || 'Failed to sign in');
+      error('Admin Login Failed', err.message || 'Failed to sign in');
     } finally {
       setIsLoading(false);
     }

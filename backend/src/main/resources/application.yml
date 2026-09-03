@@ -28,9 +28,9 @@ spring:
       path: /h2-console
 
 app:
-  jwt:
-    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours
+  firebase:
+    project-id: ${FIREBASE_PROJECT_ID:shelfsync-demo}
+    credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
   library:
     default-borrow-days: ${DEFAULT_BORROW_DAYS:14}
     fine-per-day: ${FINE_PER_DAY:1.50}
