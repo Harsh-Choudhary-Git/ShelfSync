@@ -15,6 +15,7 @@ import {
   Bookmark,
   UserCircle,
   Library,
+  UserPlus,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -27,6 +28,7 @@ export const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({
 
   const adminLinks = [
     { to: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard },
+    { to: '/admin/create-user', label: 'Create Account', icon: UserPlus },
     { to: '/admin/users', label: 'All Users', icon: Users },
     { to: '/admin/librarians', label: 'Librarians', icon: UserCheck },
     { to: '/admin/settings', label: 'System Settings', icon: Settings },

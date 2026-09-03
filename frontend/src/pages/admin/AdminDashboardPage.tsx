@@ -4,7 +4,7 @@ import { DashboardStats } from '../../types/dashboard';
 import { StatCard } from '../../components/common/StatCard';
 import { Badge } from '../../components/common/Badge';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
-import { Users, UserCheck, BookOpen, BookMarked, DollarSign, Bookmark, ShieldAlert, ArrowUpRight } from 'lucide-react';
+import { Users, UserCheck, BookOpen, BookMarked, DollarSign, Bookmark, ShieldAlert, ArrowUpRight, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const AdminDashboardPage: React.FC = () => {
@@ -26,8 +26,8 @@ export const AdminDashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Welcome banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 text-white border border-slate-800 shadow-xl">
+      {/* Welcome banner with Quick Action */}
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 text-white border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="relative z-10 max-w-2xl">
           <Badge variant="purple" size="md">
             System Administrator
@@ -36,8 +36,25 @@ export const AdminDashboardPage: React.FC = () => {
             Library Operations & Global Control
           </h2>
           <p className="text-slate-300 text-sm mt-2 leading-relaxed">
-            Monitor real-time system metrics, manage librarian staff, inspect circulation activity, and configure lending policies.
+            Monitor real-time system metrics, manage librarian staff, provision user accounts, inspect circulation activity, and configure lending policies.
           </p>
+        </div>
+
+        <div className="relative z-10 flex flex-wrap items-center gap-3">
+          <Link
+            to="/admin/create-user"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-purple-600/30 transition-all cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Create Account</span>
+          </Link>
+          <Link
+            to="/admin/users"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs sm:text-sm transition-all"
+          >
+            <Users className="w-4 h-4" />
+            <span>Manage Users</span>
+          </Link>
         </div>
       </div>
 

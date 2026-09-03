@@ -62,6 +62,7 @@ export const App: React.FC = () => {
               <Route element={<DashboardLayout />}>
                 <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                 <Route path="/admin/users" element={<UserManagementPage />} />
+                <Route path="/admin/create-user" element={<RegisterPage />} />
                 <Route path="/admin/librarians" element={<LibrarianManagementPage />} />
                 <Route path="/admin/settings" element={<SystemSettingsPage />} />
               </Route>
