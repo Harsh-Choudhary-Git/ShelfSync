@@ -14,6 +14,8 @@ import {
   Info,
   KeyRound,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
@@ -25,6 +27,7 @@ export const LoginPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'signin' | 'admin-create'>('signin');
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const from = location.state?.from?.pathname || (
@@ -171,13 +174,21 @@ export const LoginPage: React.FC = () => {
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                      className="w-full pl-10 pr-10 py-2.5 bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer p-0.5"
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
 

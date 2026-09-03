@@ -6,7 +6,7 @@ import { Badge } from '../../components/common/Badge';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { useToast } from '../../context/ToastContext';
-import { UserPlus, Edit, Trash2, Power, KeyRound, Shield, Users } from 'lucide-react';
+import { UserPlus, Edit, Trash2, Power, KeyRound, Shield, Users, Eye, EyeOff } from 'lucide-react';
 
 export const UserManagementPage: React.FC = () => {
   const { success, error } = useToast();
@@ -26,6 +26,7 @@ export const UserManagementPage: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [passwordUser, setPasswordUser] = useState<User | null>(null);
+  const [showAddPassword, setShowAddPassword] = useState(false);
 
   // Form states
   const [newUserForm, setNewUserForm] = useState({
@@ -364,14 +365,24 @@ export const UserManagementPage: React.FC = () => {
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Initial Password <span className="text-rose-500">*</span>
             </label>
-            <input
-              type="password"
-              required
-              value={newUserForm.password}
-              onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })}
-              placeholder="••••••••"
-              className="w-full px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-            />
+            <div className="relative">
+              <input
+                type={showAddPassword ? 'text' : 'password'}
+                required
+                value={newUserForm.password}
+                onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })}
+                placeholder="••••••••"
+                className="w-full pl-3.5 pr-10 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+              />
+              <button
+                type="button"
+                onClick={() => setShowAddPassword(!showAddPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer p-0.5"
+                title={showAddPassword ? 'Hide password' : 'Show password'}
+              >
+                {showAddPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
