@@ -88,18 +88,6 @@ export const RegisterPage: React.FC = () => {
     }
   };
 
-  const handleAdminQuickSignIn = async () => {
-    setIsLoading(true);
-    try {
-      await signInWithEmail('admin@shelfsync.io', 'Admin@123');
-      success('Admin Authenticated', 'You now have access to account creation.');
-    } catch (err: any) {
-      error('Admin Login Failed', err.message || 'Failed to sign in');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // If user is not an Admin, show access restriction view
   if (!isAdmin) {
     return (
@@ -132,22 +120,12 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <button
-                type="button"
-                onClick={handleAdminQuickSignIn}
-                disabled={isLoading}
+              <Link
+                to="/login"
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-purple-600 hover:bg-purple-500 active:bg-purple-700 shadow-md shadow-purple-600/30 transition-all cursor-pointer"
               >
                 <Shield className="w-4 h-4" />
-                {isLoading ? 'Signing in...' : 'Sign In as System Administrator'}
-              </button>
-
-              <Link
-                to="/login"
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition-all"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Sign In
+                Sign In as Administrator
               </Link>
             </div>
           </div>

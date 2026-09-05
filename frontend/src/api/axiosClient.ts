@@ -10,24 +10,24 @@ export const axiosClient = axios.create({
   },
 });
 
-// Request interceptor to attach Firebase ID token
+// Request interceptor to attach JWT / Firebase ID token
 axiosClient.interceptors.request.use(
   async (config) => {
     try {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        const idToken = await currentUser.getIdToken();
-        if (config.headers) {
-          config.headers.Authorization = `Bearer ${idToken}`;
-        }
+      const cachedToken = localStorage.getItem('token');
+      if (cachedToken && config.headers) {
+        config.headers.Authorization = `Bearer ${cachedToken}`;
       } else {
-        const cachedToken = localStorage.getItem('token');
-        if (cachedToken && config.headers) {
-          config.headers.Authorization = `Bearer ${cachedToken}`;
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          const idToken = await currentUser.getIdToken();
+          if (config.headers) {
+            config.headers.Authorization = `Bearer ${idToken}`;
+          }
         }
       }
     } catch (e) {
-      console.warn('Could not retrieve Firebase ID token:', e);
+      console.warn('Could not retrieve auth token:', e);
     }
     return config;
   },

@@ -55,7 +55,7 @@ export const App: React.FC = () => {
             {/* Public Routes */}
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/register" element={<Navigate to="/login" replace />} />
 
             {/* Admin Routes */}
             <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
