@@ -16,6 +16,7 @@ import {
   UserCircle,
   Library,
   UserPlus,
+  Heart,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -51,6 +52,7 @@ export const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({
     { to: '/member/books', label: 'Browse Library', icon: Compass },
     { to: '/member/loans', label: 'My Loans', icon: BookMarked },
     { to: '/member/reservations', label: 'My Reservations', icon: Bookmark },
+    { to: '/member/wishlist', label: 'My Wishlist', icon: Heart },
     { to: '/member/fines', label: 'My Fines', icon: DollarSign },
     { to: '/member/profile', label: 'My Profile', icon: UserCircle },
   ];

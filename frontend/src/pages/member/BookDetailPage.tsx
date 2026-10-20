@@ -5,6 +5,8 @@ import { Book } from '../../types/book';
 import { ReserveModal } from '../../components/reservations/ReserveModal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useToast } from '../../context/ToastContext';
+import { Heart } from 'lucide-react';
+import { wishlistApi } from '../../api/wishlistApi';
 import {
   ArrowLeft,
   BookOpen,
@@ -22,7 +24,7 @@ import {
 export const BookDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { error } = useToast();
+  const { error, success } = useToast();
 
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -107,7 +109,19 @@ export const BookDetailPage: React.FC = () => {
             >
               <BookmarkCheck className="w-4 h-4" />
               <span>Reserve This Book</span>
-            </button>
+              </button>
+              <button
+                data-testid="wishlist-add-btn"
+                onClick={() => {
+                  wishlistApi.addToWishlist(book.id)
+                    .then(() => success('Added to wishlist'))
+                    .catch(() => error('Already in wishlist or could not add'));
+                }}
+                className="px-3 py-2 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-600 text-xs font-semibold flex items-center gap-1 transition-colors"
+              >
+                <Heart className="w-3.5 h-3.5" />
+                <span>Wish</span>
+              </button>
           </div>
 
           {/* Right Column: Title, Author, Description & Metadata */}
