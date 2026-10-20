@@ -6,10 +6,12 @@ import { Book, Category } from '../../types/book';
 import { ReserveModal } from '../../components/reservations/ReserveModal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useToast } from '../../context/ToastContext';
-import { Search, Compass, BookmarkCheck, BookOpen, ChevronLeft, ChevronRight, MapPin, CheckCircle2 } from 'lucide-react';
+import { wishlistApi } from '../../api/wishlistApi';
+import { Search, Compass, BookmarkCheck, BookOpen, ChevronLeft, ChevronRight, MapPin, CheckCircle2, Heart } from 'lucide-react';
 
 export const MemberBrowseBooksPage: React.FC = () => {
   const { error } = useToast();
+  const { success } = useToast();
   const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -211,6 +213,18 @@ export const MemberBrowseBooksPage: React.FC = () => {
                   >
                     <BookmarkCheck className="w-3.5 h-3.5" />
                     <span>Reserve</span>
+                    </button>
+                  <button
+                    data-testid="wishlist-add-btn"
+                    onClick={() => {
+                      wishlistApi.addToWishlist(book.id)
+                        .then(() => success('Added to wishlist'))
+                        .catch(() => error('Already in wishlist or could not add'));
+                    }}
+                    className="px-3 py-2 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-600 text-xs font-semibold flex items-center gap-1 transition-colors"
+                  >
+                    <Heart className="w-3.5 h-3.5" />
+                    <span>Wish</span>
                   </button>
                 </div>
               </div>

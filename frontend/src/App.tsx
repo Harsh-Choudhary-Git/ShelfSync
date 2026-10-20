@@ -34,6 +34,7 @@ import { MemberLoansPage } from './pages/member/MemberLoansPage';
 import { MemberReservationsPage } from './pages/member/MemberReservationsPage';
 import { MemberFinesPage } from './pages/member/MemberFinesPage';
 import { MemberProfilePage } from './pages/member/MemberProfilePage';
+import { MemberWishlistPage } from './pages/member/MemberWishlistPage';
 
 // Root redirect handler
 const RootRedirect: React.FC = () => {
@@ -91,6 +92,7 @@ export const App: React.FC = () => {
                 <Route path="/member/books/:id" element={<BookDetailPage />} />
                 <Route path="/member/loans" element={<MemberLoansPage />} />
                 <Route path="/member/reservations" element={<MemberReservationsPage />} />
+                <Route path="/member/wishlist" element={<MemberWishlistPage />} />
                 <Route path="/member/fines" element={<MemberFinesPage />} />
                 <Route path="/member/profile" element={<MemberProfilePage />} />
               </Route>
