@@ -188,6 +188,14 @@ All API endpoints are prefixed with `/api`. Protected routes require `Authorizat
 * `GET /api/settings`: Get all library circulation rules (Admin).
 * `PUT /api/settings/{key}`: Update borrowing duration, fine rate, or max loan rules (Admin).
 
+## Wishlist
+Members can add books to a personal wishlist.
+
+**API (MEMBER role only)**
+- `GET /api/wishlist/my-wishlist` – list wishlist items
+- `POST /api/wishlist/{bookId}` – add a book to wishlist
+- `DELETE /api/wishlist/{bookId}` – remove a book from wishlist
+
 ---
 
 ## 🛡️ License
